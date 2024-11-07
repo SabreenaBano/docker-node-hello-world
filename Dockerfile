@@ -1,12 +1,14 @@
-FROM node:6.9.4
+FROM node:14
 
-RUN apt-get update -qq && apt-get install -y build-essential libpq-dev libkrb5-dev && rm -rf /var/lib/apt/lists/*
+# Use a more lightweight and updated image (e.g., alpine-based Node.js image)
+RUN apk update && apk add --no-cache build-base libpq-dev libkrb5-dev
+
 RUN mkdir -p /usr/src/app
 
 WORKDIR /usr/src/app
 
-RUN rm /etc/localtime && \
-    ln -s /usr/share/zoneinfo/Australia/Sydney/etc/localtime
+# Set the timezone (adjust if necessary)
+RUN rm /etc/localtime && ln -s /usr/share/zoneinfo/Australia/Sydney /etc/localtime
 
 COPY package.json /usr/src/app/
 RUN npm install
@@ -18,3 +20,6 @@ ENV RUNNING_DOCKER true
 
 EXPOSE 3000
 CMD [ "npm", "start" ]
+
+
+
