@@ -1,4 +1,4 @@
-FROM node:14
+FROM node:16-alpine
 
 # Use a more lightweight and updated image (e.g., alpine-based Node.js image)
 RUN apk update && apk add --no-cache build-base libpq-dev libkrb5-dev
