@@ -1,32 +1,29 @@
-FROM node:16-alpine
+FROM node:6.9.4
 
-# Install build dependencies and timezone package in one step for efficiency
-RUN apk update && apk add --no-cache build-base libpq-dev tzdata
+# Install dependencies including build-essential, libpq-dev, and libkrb5-dev
+RUN apt-get update -qq && apt-get install -y build-essential libpq-dev libkrb5-dev tzdata && \
+    rm -rf /var/lib/apt/lists/*
 
-# Set the timezone (adjust if necessary)
-RUN cp /usr/share/zoneinfo/Australia/Sydney /etc/localtime && \
-    echo "Australia/Sydney" > /etc/timezone && \
-    apk del tzdata
-
-# Create the application directory
-RUN mkdir -p /usr/src/app
-
+# Set the working directory
 WORKDIR /usr/src/app
 
-# Set npm to use a longer timeout for installation
-RUN npm config set fetch-timeout 60000
+# Configure timezone and create symlink for Sydney timezone
+RUN cp /usr/share/zoneinfo/Australia/Sydney /etc/localtime && \
+    echo "Australia/Sydney" > /etc/timezone && \
+    dpkg-reconfigure -f noninteractive tzdata
 
 # Copy package.json and install dependencies
 COPY package.json /usr/src/app/
-RUN npm install --verbose
+RUN npm install
 
 # Copy the rest of the application code
 COPY . /usr/src/app
 
-# Testing: Printed on screen to test that we are seeing the Dockerized version of the app (as opposed to localhost)
-ENV RUNNING_DOCKER=true
+# Set an environment variable to indicate Dockerized version
+ENV RUNNING_DOCKER true
 
+# Expose port 3000 for the application
 EXPOSE 3000
 
-CMD [ "npm", "start" ]
-
+# Command to run the application
+CMD ["npm", "start"]
